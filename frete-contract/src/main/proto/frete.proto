@@ -1,0 +1,66 @@
+// Contrato gRPC entre checkout-service (cliente) e frete-service (servidor).
+// Este arquivo e a UNICA coisa que os dois servicos compartilham.
+syntax = "proto3";
+
+package logistica.frete.v1;
+
+option java_multiple_files = true;
+option java_package = "br.ufg.sd.frete.v1";
+option java_outer_classname = "FreteProto";
+
+// Servico de cotacao de frete. Chamada sincrona: o checkout nao consegue
+// exibir o total do carrinho sem a resposta.
+service CotacaoFrete {
+  // Calcula valor e prazo de entrega para um pacote.
+  rpc Cotar (CotacaoRequest) returns (CotacaoResponse);
+}
+
+// ---------- Entrada ----------
+
+// Modalidade de envio escolhida pelo comprador.
+enum Modalidade {
+  MODALIDADE_NAO_ESPECIFICADA = 0;
+  ECONOMICO = 1;
+  EXPRESSO  = 2;
+  MESMO_DIA = 3;
+}
+
+// Dimensoes e peso do volume a ser transportado.
+message Pacote {
+  int32 peso_gramas    = 1;
+  int32 comprimento_cm = 2;
+  int32 largura_cm     = 3;
+  int32 altura_cm      = 4;
+  // Usado para calcular o seguro (ad valorem). Zero = sem seguro.
+  int64 valor_declarado_centavos = 5;
+}
+
+message CotacaoRequest {
+  // Identificador da cotacao, ecoado na resposta para correlacionar logs.
+  string     cotacao_id  = 1;
+  Pacote     pacote      = 2;
+  string     cep_origem  = 3;  // 8 digitos, somente numeros
+  string     cep_destino = 4;  // 8 digitos, somente numeros
+  Modalidade modalidade  = 5;
+}
+
+// ---------- Saida ----------
+
+// Uma linha da composicao do preco. Permite ao cliente exibir
+// de onde saiu cada centavo, em vez de um numero magico.
+message ComponenteCusto {
+  string descricao      = 1;
+  int64  valor_centavos = 2;
+}
+
+message CotacaoResponse {
+  string cotacao_id           = 1;
+  int64  valor_total_centavos = 2;
+  int32  prazo_dias_uteis     = 3;
+  // Peso efetivamente cobrado: o maior entre peso real e peso cubado.
+  int32  peso_taxado_gramas   = 4;
+  bool   peso_cubado_aplicado = 5;
+  repeated ComponenteCusto composicao = 6;
+  // Versao da tabela de tarifas usada, para auditoria da cotacao.
+  string versao_tabela = 7;
+}

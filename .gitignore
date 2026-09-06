@@ -1,0 +1,11 @@
+target/
+*.class
+*.jar
+.idea/
+*.iml
+.vscode/
+.DS_Store
+# NUNCA commitar credenciais do GCP
+*.json
+!**/src/**/*.json
+credentials/

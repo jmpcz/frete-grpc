@@ -1,0 +1,16 @@
+# Build
+FROM maven:3.9-eclipse-temurin-17 AS build
+WORKDIR /app
+COPY pom.xml .
+COPY frete-contract/pom.xml frete-contract/
+COPY frete-service/pom.xml frete-service/
+COPY checkout-service/pom.xml checkout-service/
+COPY frete-contract/src frete-contract/src
+COPY checkout-service/src checkout-service/src
+RUN mvn -q -pl frete-contract,checkout-service -am package -DskipTests
+
+# Runtime
+FROM eclipse-temurin:17-jre
+WORKDIR /app
+COPY --from=build /app/checkout-service/target/checkout-service.jar app.jar
+ENTRYPOINT ["java", "-jar", "app.jar"]
