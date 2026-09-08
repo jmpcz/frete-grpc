@@ -101,3 +101,7 @@ O servidor registra em log o tamanho de cada mensagem em bytes, evidenciando a c
 
 ## Autores
 
+- João Marcelo Picazo — [@jmpcz](https://github.com/jmpcz)
+- Yuri Salatiel — [@salatieeel](https://github.com/salatieeel)
+- João Vitor Lemos Bonfim — [@Jvlemosb](https://github.com/Jvlemosb)
+
