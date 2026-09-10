@@ -116,10 +116,7 @@ public class ClienteCheckout {
         }
     }
 
-    /**
-     * Compara o tamanho do payload em protobuf com o equivalente em JSON.
-     * E a evidencia concreta da serializacao pedida no enunciado.
-     */
+    /** Compara o tamanho do payload em protobuf com o equivalente em JSON. */
     private static void imprimirComparacaoSerializacao(CotacaoRequest req, CotacaoResponse resp) {
         try {
             JsonFormat.Printer printer = JsonFormat.printer().omittingInsignificantWhitespace();

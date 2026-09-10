@@ -8,12 +8,7 @@ import io.grpc.stub.StreamObserver;
 
 import java.util.logging.Logger;
 
-/**
- * Adaptador entre o transporte gRPC e a regra de negocio.
- *
- * Responsabilidades: logar, medir, traduzir erro de dominio em status gRPC.
- * O calculo em si fica na CalculadoraFrete.
- */
+/** Adaptador gRPC: loga, mede e traduz erro de dominio em status; o calculo fica na CalculadoraFrete. */
 public class CotacaoFreteImpl extends CotacaoFreteGrpc.CotacaoFreteImplBase {
 
     private static final Logger log = Logger.getLogger(CotacaoFreteImpl.class.getName());

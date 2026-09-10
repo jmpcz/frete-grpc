@@ -8,10 +8,7 @@ import br.ufg.sd.frete.v1.Pacote;
 
 import java.util.regex.Pattern;
 
-/**
- * Regra de negocio do frete. Nao conhece gRPC nem rede: recebe uma requisicao,
- * devolve uma resposta. Isso mantem a logica testavel isoladamente.
- */
+/** Regra de negocio do frete, isolada de gRPC e rede para ser testavel. */
 public class CalculadoraFrete {
 
     private static final Pattern CEP_VALIDO = Pattern.compile("\\d{8}");

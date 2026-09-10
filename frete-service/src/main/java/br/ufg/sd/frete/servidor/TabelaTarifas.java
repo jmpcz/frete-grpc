@@ -2,12 +2,7 @@ package br.ufg.sd.frete.servidor;
 
 import java.util.Map;
 
-/**
- * Tabela de tarifas do transportador.
- *
- * Fica separada da CalculadoraFrete de proposito: a politica comercial muda
- * com frequencia, a regra de calculo nao.
- */
+/** Tarifas do transportador, separadas da CalculadoraFrete porque a politica comercial muda com frequencia. */
 public final class TabelaTarifas {
 
     public static final String VERSAO = "tabela-2026.08";
@@ -26,11 +21,9 @@ public final class TabelaTarifas {
         REMOTO   ("Remoto",    3900L, 1900L, 12);
 
         public final String rotulo;
-        /** Tarifa fixa da faixa, em centavos. */
         public final long tarifaBaseCentavos;
-        /** Valor cobrado por quilo taxado, em centavos. */
         public final long porKgCentavos;
-        /** Prazo de referencia da faixa, em dias uteis (modalidade economica). */
+        /** Prazo de referencia em dias uteis (modalidade economica). */
         public final int prazoBaseDias;
 
         Faixa(String rotulo, long tarifaBaseCentavos, long porKgCentavos, int prazoBaseDias) {
@@ -62,10 +55,7 @@ public final class TabelaTarifas {
         }
     }
 
-    /**
-     * Matriz de faixas entre regioes. Explicita de proposito: qualquer pessoa
-     * consegue conferir a classificacao de uma rota lendo esta tabela.
-     */
+    /** Faixa entre cada par de regioes de origem e destino. */
     private static final Map<Regiao, Map<Regiao, Faixa>> MATRIZ = Map.of(
             Regiao.SUDESTE, Map.of(
                     Regiao.SUDESTE,      Faixa.REGIONAL,
@@ -99,7 +89,6 @@ public final class TabelaTarifas {
                     Regiao.NORTE,        Faixa.REGIONAL)
     );
 
-    /** Classifica um CEP de 8 digitos em sua regiao logistica. */
     public static Regiao regiaoDe(String cep) {
         int prefixo = Integer.parseInt(cep.substring(0, 2));
         if (prefixo <= 39) return Regiao.SUDESTE;
@@ -109,13 +98,7 @@ public final class TabelaTarifas {
         return Regiao.SUL;
     }
 
-    /**
-     * Determina a faixa de uma rota.
-     *
-     * Mesmo prefixo de 2 digitos significa mesma area de distribuicao:
-     * classifica como LOCAL, unica faixa em que MESMO_DIA e ofertado.
-     * Caso contrario, consulta a matriz entre regioes.
-     */
+    /** Mesmo prefixo de 2 digitos = LOCAL (unica faixa que oferta MESMO_DIA); senao, consulta a matriz. */
     public static Faixa faixaEntre(String cepOrigem, String cepDestino) {
         if (cepOrigem.substring(0, 2).equals(cepDestino.substring(0, 2))) {
             return Faixa.LOCAL;
