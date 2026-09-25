@@ -14,6 +14,8 @@
     <module>frete-contract</module>
     <module>frete-service</module>
     <module>checkout-service</module>
+    <module>pedidos-service</module>
+    <module>api-gateway</module>
   </modules>
 
   <properties>

@@ -1,0 +1,40 @@
+// Contrato gRPC entre api-gateway (cliente) e pedidos-service (servidor).
+syntax = "proto3";
+
+package logistica.pedidos.v1;
+
+option java_multiple_files = true;
+option java_package = "br.ufg.sd.pedidos.v1";
+option java_outer_classname = "PedidosProto";
+
+service Pedidos {
+  rpc Salvar (SalvarPedidoRequest) returns (PedidoResponse);
+  rpc Listar (ListarPedidosRequest) returns (ListaPedidos);
+}
+
+message SalvarPedidoRequest {
+  string item                 = 1;
+  int32  quantidade           = 2;
+  string cep_origem           = 3;  // 8 digitos
+  string cep_destino          = 4;  // 8 digitos
+  string modalidade           = 5;
+  int64  valor_frete_centavos = 6;  // cotacao devolvida pelo frete-service
+}
+
+message PedidoResponse {
+  string id                   = 1;
+  string item                 = 2;
+  int32  quantidade           = 3;
+  string cep_origem           = 4;
+  string cep_destino          = 5;
+  string modalidade           = 6;
+  int64  valor_frete_centavos = 7;
+  string status               = 8;
+  string criado_em            = 9;  // instante ISO-8601
+}
+
+message ListarPedidosRequest {}
+
+message ListaPedidos {
+  repeated PedidoResponse pedidos = 1;
+}

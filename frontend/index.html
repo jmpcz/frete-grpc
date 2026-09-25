@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>frete-grpc — pedidos</title>
+  <style>
+    :root {
+      --azul: #0b5cad;
+      --azul-esc: #084a8c;
+      --cinza: #5b6570;
+      --borda: #d9e1ea;
+      --fundo: #f2f5f9;
+      --erro: #c0392b;
+      --ok: #1e8449;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; font-family: "Segoe UI", Arial, sans-serif;
+      background: var(--fundo); color: #1a1a1a; line-height: 1.45;
+    }
+    header {
+      background: var(--azul); color: #fff; padding: 14px 20px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+    }
+    header h1 { font-size: 18px; margin: 0; }
+    header .disc { font-size: 12px; opacity: .85; letter-spacing: 1px; text-transform: uppercase; }
+    .config { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+    .config input { width: 220px; }
+    main { max-width: 880px; margin: 22px auto; padding: 0 16px; }
+    .card {
+      background: #fff; border: 1px solid var(--borda); border-radius: 8px;
+      padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 2px rgba(0,0,0,.04);
+    }
+    h2 { font-size: 16px; margin: 0 0 14px; color: var(--azul-esc); }
+    label { display: block; font-size: 13px; color: var(--cinza); margin: 10px 0 4px; }
+    input, select {
+      width: 100%; padding: 8px 10px; border: 1px solid var(--borda);
+      border-radius: 6px; font-size: 14px; background: #fff;
+    }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 14px; }
+    button {
+      background: var(--azul); color: #fff; border: none; border-radius: 6px;
+      padding: 10px 18px; font-size: 14px; cursor: pointer; margin-top: 14px;
+    }
+    button:hover { background: var(--azul-esc); }
+    button.secundario { background: #fff; color: var(--azul); border: 1px solid var(--azul); }
+    .msg { margin-top: 12px; padding: 10px 12px; border-radius: 6px; font-size: 14px; display: none; }
+    .msg.erro { background: #fdecea; color: var(--erro); border: 1px solid #f5c6c0; display: block; }
+    .msg.ok   { background: #e8f6ee; color: var(--ok);   border: 1px solid #bfe6cd; display: block; }
+    .msg ul { margin: 6px 0 0; padding-left: 18px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--borda); }
+    th { background: #eef3f8; color: var(--cinza); font-weight: 600; }
+    td.valor { text-align: right; font-variant-numeric: tabular-nums; }
+    .hidden { display: none; }
+    .linha-topo { display: flex; align-items: center; justify-content: space-between; }
+    code { background: #eef3f8; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+    .rodape { text-align: center; font-size: 12px; color: var(--cinza); margin: 10px 0 30px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <div class="disc">Sistemas Distribuídos</div>
+      <h1>frete-grpc — pedidos</h1>
+    </div>
+    <div class="config">
+      <label for="gateway" style="margin:0;color:#fff">Gateway</label>
+      <input id="gateway" value="http://localhost:8080">
+    </div>
+  </header>
+
+  <main>
+    <!-- LOGIN -->
+    <section id="secaoLogin" class="card">
+      <h2>Entrar</h2>
+      <label for="usuario">Usuário</label>
+      <input id="usuario" value="admin" autocomplete="username">
+      <label for="senha">Senha</label>
+      <input id="senha" type="password" value="admin123" autocomplete="current-password">
+      <button onclick="entrar()">Entrar</button>
+      <div id="msgLogin" class="msg"></div>
+    </section>
+
+    <!-- APLICAÇÃO (após login) -->
+    <section id="secaoApp" class="hidden">
+      <div class="card">
+        <div class="linha-topo">
+          <h2 style="margin:0">Novo pedido</h2>
+          <button class="secundario" style="margin:0" onclick="sair()">Sair</button>
+        </div>
+        <label for="item">Item</label>
+        <input id="item" value="notebook">
+        <div class="grid">
+          <div>
+            <label for="quantidade">Quantidade</label>
+            <input id="quantidade" type="number" value="2">
+          </div>
+          <div>
+            <label for="modalidade">Modalidade</label>
+            <select id="modalidade">
+              <option>ECONOMICO</option>
+              <option selected>EXPRESSO</option>
+              <option>MESMO_DIA</option>
+            </select>
+          </div>
+          <div>
+            <label for="cepOrigem">CEP origem</label>
+            <input id="cepOrigem" value="74000000">
+          </div>
+          <div>
+            <label for="cepDestino">CEP destino</label>
+            <input id="cepDestino" value="01000000">
+          </div>
+          <div>
+            <label for="pesoGramas">Peso (g)</label>
+            <input id="pesoGramas" type="number" value="2200">
+          </div>
+          <div>
+            <label for="comprimentoCm">Comprimento (cm)</label>
+            <input id="comprimentoCm" type="number" value="40">
+          </div>
+          <div>
+            <label for="larguraCm">Largura (cm)</label>
+            <input id="larguraCm" type="number" value="30">
+          </div>
+          <div>
+            <label for="alturaCm">Altura (cm)</label>
+            <input id="alturaCm" type="number" value="8">
+          </div>
+          <div>
+            <label for="valorDeclaradoCentavos">Valor declarado (centavos, opcional)</label>
+            <input id="valorDeclaradoCentavos" type="number" value="750000">
+          </div>
+        </div>
+        <button onclick="criarPedido()">Criar pedido</button>
+        <div id="msgPedido" class="msg"></div>
+      </div>
+
+      <div class="card">
+        <div class="linha-topo">
+          <h2 style="margin:0">Pedidos gravados</h2>
+          <button class="secundario" style="margin:0" onclick="listar()">Atualizar</button>
+        </div>
+        <div id="msgLista" class="msg"></div>
+        <table id="tabela">
+          <thead>
+            <tr><th>Item</th><th>Qtd</th><th>Rota</th><th>Modalidade</th><th class="valor">Frete</th><th>Status</th></tr>
+          </thead>
+          <tbody id="corpoTabela"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="rodape">Frontend → API Gateway (REST/JWT) → frete-service + pedidos-service (gRPC) → PostgreSQL</div>
+  </main>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const base = () => $("gateway").value.replace(/\/+$/, "");
+    let token = localStorage.getItem("token") || null;
+
+    function mostra(id, tipo, htmlConteudo) {
+      const el = $(id);
+      el.className = "msg " + tipo;
+      el.innerHTML = htmlConteudo;
+    }
+    function limpa(id) { $(id).className = "msg"; $(id).innerHTML = ""; }
+
+    function reais(centavos) {
+      return "R$ " + (centavos / 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 });
+    }
+
+    async function entrar() {
+      limpa("msgLogin");
+      try {
+        const r = await fetch(base() + "/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ usuario: $("usuario").value, senha: $("senha").value })
+        });
+        if (!r.ok) {
+          const e = await r.json().catch(() => ({}));
+          mostra("msgLogin", "erro", e.mensagem || ("Falha no login (HTTP " + r.status + ")"));
+          return;
+        }
+        const dados = await r.json();
+        token = dados.token;
+        localStorage.setItem("token", token);
+        entrarNaApp();
+      } catch (err) {
+        mostra("msgLogin", "erro", "Não foi possível falar com o gateway em " + base() + ". Ele está no ar?");
+      }
+    }
+
+    function entrarNaApp() {
+      $("secaoLogin").classList.add("hidden");
+      $("secaoApp").classList.remove("hidden");
+      listar();
+    }
+
+    function sair() {
+      token = null;
+      localStorage.removeItem("token");
+      $("secaoApp").classList.add("hidden");
+      $("secaoLogin").classList.remove("hidden");
+    }
+
+    function numero(id) {
+      const v = $(id).value.trim();
+      return v === "" ? null : Number(v);
+    }
+
+    async function criarPedido() {
+      limpa("msgPedido");
+      const corpo = {
+        item: $("item").value,
+        quantidade: numero("quantidade"),
+        cepOrigem: $("cepOrigem").value,
+        cepDestino: $("cepDestino").value,
+        modalidade: $("modalidade").value,
+        pesoGramas: numero("pesoGramas"),
+        comprimentoCm: numero("comprimentoCm"),
+        larguraCm: numero("larguraCm"),
+        alturaCm: numero("alturaCm"),
+        valorDeclaradoCentavos: numero("valorDeclaradoCentavos")
+      };
+      try {
+        const r = await fetch(base() + "/pedidos", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+          body: JSON.stringify(corpo)
+        });
+        if (r.status === 401) { mostra("msgPedido", "erro", "Sessão expirada. Entre novamente."); sair(); return; }
+        const dados = await r.json().catch(() => ({}));
+        if (r.status === 201) {
+          mostra("msgPedido", "ok",
+            "Pedido criado! <code>" + dados.id + "</code><br>Frete: <b>" + reais(dados.valorFreteCentavos) +
+            "</b> · prazo " + dados.prazoDiasUteis + " dia(s) útil(eis)");
+          listar();
+        } else if (r.status === 400 && dados.erros) {
+          const itens = Object.entries(dados.erros).map(([c, m]) => "<li><b>" + c + "</b>: " + m + "</li>").join("");
+          mostra("msgPedido", "erro", (dados.mensagem || "Dados inválidos") + "<ul>" + itens + "</ul>");
+        } else {
+          mostra("msgPedido", "erro", (dados.mensagem || "Erro") + " (HTTP " + r.status + ")");
+        }
+      } catch (err) {
+        mostra("msgPedido", "erro", "Falha ao chamar o gateway. Verifique o endereço e se os serviços estão no ar.");
+      }
+    }
+
+    async function listar() {
+      limpa("msgLista");
+      try {
+        const r = await fetch(base() + "/pedidos", { headers: { "Authorization": "Bearer " + token } });
+        if (r.status === 401) { mostra("msgLista", "erro", "Sessão expirada. Entre novamente."); sair(); return; }
+        const lista = await r.json();
+        const corpo = $("corpoTabela");
+        corpo.innerHTML = "";
+        if (!lista.length) { mostra("msgLista", "ok", "Nenhum pedido ainda."); return; }
+        for (const p of lista) {
+          const tr = document.createElement("tr");
+          tr.innerHTML =
+            "<td>" + p.item + "</td>" +
+            "<td>" + p.quantidade + "</td>" +
+            "<td>" + p.cepOrigem + " → " + p.cepDestino + "</td>" +
+            "<td>" + p.modalidade + "</td>" +
+            "<td class='valor'>" + reais(p.valorFreteCentavos) + "</td>" +
+            "<td>" + p.status + "</td>";
+          corpo.appendChild(tr);
+        }
+      } catch (err) {
+        mostra("msgLista", "erro", "Não foi possível carregar a lista.");
+      }
+    }
+
+    if (token) entrarNaApp();
+  </script>
+</body>
+</html>
