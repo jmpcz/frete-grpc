@@ -5,6 +5,8 @@ COPY pom.xml .
 COPY frete-contract/pom.xml frete-contract/
 COPY frete-service/pom.xml frete-service/
 COPY checkout-service/pom.xml checkout-service/
+COPY pedidos-service/pom.xml pedidos-service/
+COPY api-gateway/pom.xml api-gateway/
 COPY frete-contract/src frete-contract/src
 COPY checkout-service/src checkout-service/src
 RUN mvn -q -pl frete-contract,checkout-service -am package -DskipTests
